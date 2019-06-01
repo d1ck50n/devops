@@ -1,0 +1,47 @@
+def AGENT_LABEL = "slave-${UUID.randomUUID().toString()}"
+def k8sDeploymentFile = "k8s-service.yml"
+
+pipeline {
+    agent {
+        kubernetes {
+            label "${AGENT_LABEL}"
+            defaultContainer 'jenkins-jnlp-slave-docker'
+            yamlFile 'k8s-jnlp-slave.yml'
+        }
+    }
+
+    stages {
+        stage('Build artifacts') {
+            steps {
+                // maven3 need to pre-configure in Jenkins
+                // mavenSettingsConfig is optional when you have customize settings.xml file using Config File Management plugin
+                withMaven(maven: 'maven3', mavenSettingsConfig: 'maven-settings') {                    
+                    sh "mvn clean install -Dmaven.test.skip=true"
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    withEnv(["WORKSPACE=${pwd()}"]) {                                            
+                        //docker-credential is credential set in Jenkins to authenticate against your docker registry
+                        docker.withRegistry("YOUR_NEXUS_REGISTRY", 'docker-credential') {
+                            def image = docker.build("YOUR_IMAGE_NAME", "PROJECT_DIR/Dockerfile .")   
+                            image.push()                            
+                        }
+                    }
+                }
+            }
+        }       
+
+        stage('Run kubernetes deployment') {
+            steps {                
+                // kubeconfig is your kube config file which need to pre-configure in Jenkins as secret file 
+                withKubeConfig([credentialsId: 'kubeconfig']) {                    
+                    sh "kubectl create -f ${k8sDeploymentFile}"                    
+                }
+            }
+        }
+    }
+}
