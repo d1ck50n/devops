@@ -1,6 +1,10 @@
-def AGENT_LABEL = "slave-${UUID.randomUUID().toString()}"
-def k8sDeploymentFile = "k8s-service.yml"
+//Sample Jenkinsfile 
 
+def AGENT_LABEL = "slave-${UUID.randomUUID().toString()}"
+def K8S_DEPLOYMENT_FILE = "k8s-service.yml"
+
+// This is where the dynamic slave magic happen, 
+// it launch the agent using randomly generated number as k8s pod 
 pipeline {
     agent {
         kubernetes {
@@ -39,7 +43,7 @@ pipeline {
             steps {                
                 // kubeconfig is your kube config file which need to pre-configure in Jenkins as secret file 
                 withKubeConfig([credentialsId: 'kubeconfig']) {                    
-                    sh "kubectl create -f ${k8sDeploymentFile}"                    
+                    sh "kubectl create -f ${K8S_DEPLOYMENT_FILE}"                    
                 }
             }
         }

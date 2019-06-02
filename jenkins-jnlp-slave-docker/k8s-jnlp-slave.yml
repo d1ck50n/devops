@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    name: jenkins-jnlp-slave-docker
+spec:
+  containers:
+  - name: jenkins-jnlp-slave-docker
+    image: d1ck50n/jenkins-jnlp-slave-docker:latest
+    command: ['cat']
+    tty: true
+    imagePullPolicy: Always    
+    volumeMounts:
+    - name: dockersock
+      mountPath: "/var/run/docker.sock"
+  imagePullSecrets:
+  - name: tntcred
+  volumes:
+  - name: dockersock
+    hostPath:
+      path: /var/run/docker.sock
