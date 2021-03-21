@@ -1,0 +1,16 @@
+#!/bin/bash -e
+#
+# The 'assemble' script builds your application source ready to run.
+#
+# For more information refer to the documentation:
+#	https://github.com/openshift/source-to-image/blob/master/docs/builder_image.md
+#
+
+if [[ "$1" == "-h" ]]; then
+    exec /usr/libexec/s2i/usage
+fi
+
+echo "---> Installing application source"
+
+#By default the s2i build places the application source in /tmp/src directory
+cp -Rf /tmp/src/. /app 
