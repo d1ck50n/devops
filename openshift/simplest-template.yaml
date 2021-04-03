@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Template
+labels:
+  app: simplest-template
+  template: simplest-template
+message: |-
+  The following service(s) have been created in your project: ${SECRET_NAME}.
+
+metadata:
+  annotations:
+    description: |-
+      This is just a test for simplest template
+
+      WARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.
+    iconClass: icon-nodejs
+    openshift.io/display-name: My Simplest Template Test
+    openshift.io/documentation-url: https://github.com/sclorg/nodejs-ex
+    openshift.io/long-description: This template created for tutorial only.
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://access.redhat.com
+    tags: quickstart,simplest-template
+    template.openshift.io/bindable: 'false'
+  name: simple-template-test
+  labels:
+    app: simplest-template
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: "${SECRET_NAME}"
+    labels:
+      app: simplest-template
+  stringData:    
+    database-password: "${DATABASE_PASSWORD}"
+    database-user: "${DATABASE_USER}"
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: "${IMAGE_STREAM_NAME}"
+    labels:
+      app: simplest-template
+parameters:
+- description: The name assigned to secret.
+  displayName: Secret Name
+  name: SECRET_NAME
+  required: true
+- description: Username for the database user.
+  displayName: Database Username
+  name: DATABASE_USER
+  value: dickson
+- description: Password for the database user.
+  displayName: Database Password
+  from: "[a-zA-Z0-9]{16}"
+  generate: expression
+  name: DATABASE_PASSWORD
+  required: true
+- description: Password for the database user.
+  displayName: Database Password
+  name: IMAGE_STREAM_NAME
+  required: true
+  value: default-image-stream
